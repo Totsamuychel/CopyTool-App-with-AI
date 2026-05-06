@@ -8,6 +8,44 @@
 
 ---
 
+## 🏗️ Architecture
+
+```mermaid
+graph TD
+    A["⌨️ Hotkey\nCtrl+Shift+X"] --> B["🖥️ Screen Overlay\nui.py · Tkinter semi-transparent"]
+    B --> C["🔲 Mouse Drag\nSelect region"]
+    C --> D["📸 Screen Capture\ncapture.py · mss"]
+    D --> E["🔄 Base64 Encode\nimage → base64 string"]
+    E --> F["📨 HTTP POST\nollama_api.py"]
+
+    F --> G{"Ollama running?"}
+
+    G -- "Yes" --> H["🧠 Ollama VLM\nqwen2.5vl:7b\n(local)"] 
+    G -- "No" --> I["▶️ Start Ollama Server\nollama_runner.py"]
+    I --> H
+
+    H --> J["📝 Extracted Text"]
+    J --> K["📋 Windows Clipboard\npyperclip / win32clipboard"]
+    K --> L["✅ Ctrl+V ready"]
+
+    subgraph App["📦 Application Core"]
+        M["📥 main.py\nEntry point"]
+        N["🔧 config.py\n.env settings\nhotkey · model · host"]
+        O["🗼 System Tray\napp.py · pystray"]
+    end
+
+    M --> O
+    N --> F
+    O -- "Tray menu" --> I
+    O -- "Hotkey register" --> A
+
+    subgraph Optional["🌐 Optional: Remote Ollama"]
+        P["Ngrok tunnel\n(.env NGROK_URL)"] --> F
+    end
+```
+
+---
+
 ## ✨ Features
 
 - **Local Processing**: Keeps your data private by using an Ollama server running on your PC (e.g. `qwen2.5vl:7b`).
